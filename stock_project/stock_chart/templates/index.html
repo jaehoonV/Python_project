@@ -5,20 +5,123 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Chart</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  <!-- jQuery -->
+    <style>
+        #autocomplete-results {
+            border: 1px solid #ccc;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            position: absolute;
+            background-color: white;
+            left: 105px;
+            z-index: 10;
+        }
+
+        #autocomplete-results div {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #autocomplete-results div:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
 </head>
 <body>
     <h1>Stock Price Chart</h1>
     
-    <!-- 기간 선택 버튼 -->
-    <form action="{% url 'chart' %}" method="get">
-        <button type="submit" name="period" value="130" {% if period == 6 %}disabled{% endif %}>6개월</button>
-        <button type="submit" name="period" value="260" {% if period == 12 %}disabled{% endif %}>1년</button>
-        <button type="submit" name="period" value="520" {% if period == 24 %}disabled{% endif %}>2년</button>
-    </form>
+    <div style="display: flex;">
+        <div id="form_div">
+            <form action="{% url 'chart' %}" method="get">
+                <label for="ticker">Stock Search:</label>
+                <input name="ticker" type="text" id="ticker-search" placeholder="Search for a stock ticker..." autocomplete="off" value="{{ selected_ticker }}">
+                <div id="autocomplete-results"></div>
 
-    {% if chart_img %}
-        <h2>Stock Chart for {{ period }} Months</h2>
-        <img src="data:image/png;base64,{{ chart_img }}" alt="Stock Chart"/>
-    {% endif %}
+                <!-- 차트 옵션 -->
+                <h3>Chart Options:</h3>
+                <!-- 기간 선택 버튼 -->
+                <select name="period" id="period">
+                    <option value="130" {% if period == 6 %}selected{% endif %} >6개월</option>
+                    <option value="260" {% if period == 12 %}selected{% endif %} >1년</option>
+                    <option value="520" {% if period == 24 %}selected{% endif %} >2년</option>
+                </select>
+                <div>
+                    <input type="checkbox" name="show_ma5" id="show_ma5" {% if show_ma5 %}checked{% endif %}>
+                    <label for="show_ma5">Show MA5</label><br>
+                    
+                    <input type="checkbox" name="show_ma20" id="show_ma20" {% if show_ma20 %}checked{% endif %}>
+                    <label for="show_ma20">Show MA20</label><br>
+
+                    <input type="checkbox" name="show_ma60" id="show_ma60" {% if show_ma60 %}checked{% endif %}>
+                    <label for="show_ma60">Show MA60</label><br>
+
+                    <input type="checkbox" name="show_ma120" id="show_ma120" {% if show_ma120 %}checked{% endif %}>
+                    <label for="show_ma120">Show MA120</label><br>
+
+                    <input type="checkbox" name="show_bb" id="show_bb" {% if show_bb %}checked{% endif %}>
+                    <label for="show_bb">Show Bollinger Bands</label><br>
+                </div>
+
+                <!-- 제출 -->
+                <button type="submit">Update Chart</button>
+            </form>
+        </div>
+        <div style="width: 1300px; margin: 0 auto;">
+            {% if chart_img %}
+            <h2>Chart for {{ selected_ticker }}</h2>
+            <img src="data:image/png;base64,{{ chart_img }}" alt="Stock Chart">
+            {% endif %}
+
+            {% if error_message %}
+            <p style="color: red;">{{ error_message }}</p>
+            {% endif %}
+        </div>
+    </div>
 </body>
+<script>
+    // 자동완성 기능
+    $('#ticker-search').on('input', function() {
+        var query = $(this).val();
+        if (query.length > 0) {
+            // AJAX 요청 보내기
+            $.ajax({
+                url: '{% url "autocomplete_tickers" %}',
+                data: {
+                    'q': query
+                },
+                success: function(data) {
+                    // 자동완성 목록 표시
+                    var results = $('#autocomplete-results');
+                    results.empty();
+                    if (data.length > 0) {
+                        data.forEach(function(ticker) {
+                            results.append('<div>' + ticker.symbol + ' - ' + ticker.name + '</div>');
+                        });
+                        results.show();
+                    } else {
+                        results.hide();
+                    }
+                }
+            });
+        } else {
+            $('#autocomplete-results').hide();
+        }
+    });
+
+    // 사용자가 선택한 항목을 입력창에 넣기
+    $(document).on('click', '#autocomplete-results div', function() {
+        var selectedText = $(this).text();
+        $('#ticker-search').val(selectedText.split(' - ')[0]);  // 티커 심볼만 넣기
+        $('#autocomplete-results').hide();
+    });
+
+    // 입력창에서 벗어나면 자동완성 목록 숨기기
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#ticker-search').length) {
+            $('#autocomplete-results').hide();
+        }
+    });
+</script>
 </html>
