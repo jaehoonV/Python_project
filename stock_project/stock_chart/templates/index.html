@@ -1,0 +1,24 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Chart</title>
+</head>
+<body>
+    <h1>Stock Price Chart</h1>
+    
+    <!-- 기간 선택 버튼 -->
+    <form action="{% url 'chart' %}" method="get">
+        <button type="submit" name="period" value="130" {% if period == 6 %}disabled{% endif %}>6개월</button>
+        <button type="submit" name="period" value="260" {% if period == 12 %}disabled{% endif %}>1년</button>
+        <button type="submit" name="period" value="520" {% if period == 24 %}disabled{% endif %}>2년</button>
+    </form>
+
+    {% if chart_img %}
+        <h2>Stock Chart for {{ period }} Months</h2>
+        <img src="data:image/png;base64,{{ chart_img }}" alt="Stock Chart"/>
+    {% endif %}
+</body>
+</html>

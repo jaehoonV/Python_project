@@ -1,0 +1,15 @@
+<!-- templates/chart.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock Chart</title>
+</head>
+<body>
+    <h1>Stock Price Chart</h1>
+    <img src="data:image/png;base64,{{ chart_img }}" alt="Stock Chart">
+    <br>
+    <a href="{% url 'index' %}">Back to Home</a>
+</body>
+</html>
