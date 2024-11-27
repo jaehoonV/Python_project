@@ -8,9 +8,11 @@
     <title>Stock Chart</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  <!-- jQuery -->
-    <script src="{% static 'script/chart.js' %}"></script>
+    <script src="{% static 'script/chart_bokeh.js' %}"></script>
     <link rel="stylesheet" href="{% static 'style/basic.css' %}">
-    <link rel="stylesheet" href="{% static 'style/chart.css' %}">
+    <link rel="stylesheet" href="{% static 'style/chart_bokeh.css' %}">
+    <link rel="stylesheet" href="https://cdn.bokeh.org/bokeh/release/bokeh-3.6.1.min.css">
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-3.6.1.min.js"></script>
 </head>
 <body>
     <h1>Stock Price Chart</h1>
@@ -58,14 +60,11 @@
                     <label for="show_volume">Show Volume</label><br>
                 </div>
             </form>
-            <a href="{% url 'bokeh_index' %}">
-                <button>Go to Bokeh Chart</button>
-            </a>
         </div>
         <div style="width: 100%; padding: 20px;">
-            <div style="width: 1700px; margin: 0 auto;">
+            <div style="width: 1400px; margin: 0 auto;">
                 <h2>Chart for <span id="selected-ticker-name"></span></h2>
-                <div id="chart-image-div" data-url="{% url 'generate_chart_image' %}"></div>
+                <div id="chart-image-div" data-url="{% url 'update_chart' %}"></div>
             </div>
         </div>
     </div>

@@ -55,7 +55,10 @@ ROOT_URLCONF = 'stock_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'stock_chart', 'templates'),
+            os.path.join(BASE_DIR, 'stock_chart_bokeh', 'templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -121,6 +124,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'stock_chart', 'static'),
+    os.path.join(BASE_DIR, 'stock_chart_bokeh', 'static'),
 ]
 
 # Default primary key field type
