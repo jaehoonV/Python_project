@@ -1,0 +1,40 @@
+#image-form-div{
+    display: flex;
+    gap: 10px;
+}
+#drop-zone {
+    width: 45%;
+    height: 200px;
+    border: 2px dashed #cccccc;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    color: #888888;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+#drop-zone.drag-over {
+    background-color: #f0f8ff;
+    border-color: #007bff;
+}
+#file-list-div{
+    width: 45%;
+    height: 220px;
+    padding: 10px;
+    overflow-y: auto;
+}
+#file-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+#file-list li {
+    background-color: #f9f9f9;
+    margin: 2px 0;
+    padding: 2px 5px;
+    border: 1px solid #dddddd;
+    border-radius: 5px;
+    font-size: 12px;
+}

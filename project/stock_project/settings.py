@@ -58,6 +58,7 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'stock_chart', 'templates'),
             os.path.join(BASE_DIR, 'stock_chart_bokeh', 'templates'),
+            os.path.join(BASE_DIR, 'Image_Optimization', 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -125,9 +126,16 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'stock_chart', 'static'),
     os.path.join(BASE_DIR, 'stock_chart_bokeh', 'static'),
+    os.path.join(BASE_DIR, 'Image_Optimization', 'static'),
 ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = '/media/'  # 미디어 파일에 접근하는 URL 경로
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # 파일이 저장되는 실제 경로
+
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DATA_UPLOAD_MAX_NUMBER_FILES = None

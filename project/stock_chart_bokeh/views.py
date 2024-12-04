@@ -1,4 +1,4 @@
-# stock_chart/views.py
+# stock_chart_bokeh/views.py
 # 실행 python manage.py runserver
 
 import matplotlib

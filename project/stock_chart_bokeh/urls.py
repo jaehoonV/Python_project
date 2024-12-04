@@ -1,4 +1,4 @@
-# stock_chart/urls.py
+# stock_chart_bokeh/urls.py
 
 from django.urls import path
 from . import views  # views.py 파일에서 view 함수들을 가져옵니다

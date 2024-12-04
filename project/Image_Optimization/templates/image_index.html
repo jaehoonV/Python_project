@@ -1,0 +1,48 @@
+<!-- image_index.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Optimization</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  <!-- jQuery -->
+    <script src="{% static 'script/image_index.js' %}" defer></script>
+    <link rel="stylesheet" href="{% static 'style/basic.css' %}">
+    <link rel="stylesheet" href="{% static 'style/image_index.css' %}">
+</head>
+<body>
+    <h1>Image Optimization</h1>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="image-form-div">
+            <div id="drop-zone">
+                Drag & Drop your files here or <span style="color: blue; text-decoration: underline;">click to select</span>.
+            </div>
+            <div id="file-list-div">
+                <ul id="file-list"></ul>
+            </div>
+        </div>
+        <input type="file" id="file-input" name="files" multiple hidden>
+        <br><br>
+
+        <label for="quality">Optimization Quality (0-100):</label>
+        <input type="number" name="quality" id="quality" min="0" max="100" value="70"><br><br>
+
+        <button type="submit">Optimize</button>
+
+        
+    </form>
+    {% if file_urls %}
+        <h2>Optimized Image</h2>
+        <ul>
+            {% for file_url in file_urls %}
+                <li>
+                    <img src="{{ file_url }}" alt="{{ file_url }}" width="100px"/>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
