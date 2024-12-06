@@ -128,12 +128,4 @@ $(document).ready(function () {
     // 초기 차트 생성
     updateChart();
 
-    function loading(el, b){
-        $(el).empty();
-        if(b){
-            $(el).append('<div class="loader"><span><i></i></span></div>');
-        }else{
-            $(el).find('.loader').remove();
-        }
-    }
 });

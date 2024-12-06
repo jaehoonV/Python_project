@@ -7,14 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Optimization</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  <!-- jQuery -->
-    <script src="{% static 'script/image_index.js' %}" defer></script>
+    <script src="{% static 'script/common.js' %}"></script>
+    <script src="{% static 'script/image_index.js' %}"></script>
     <link rel="stylesheet" href="{% static 'style/basic.css' %}">
     <link rel="stylesheet" href="{% static 'style/image_index.css' %}">
 </head>
 <body>
     <h1>Image Optimization</h1>
     
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="image-form" data-url="{% url 'optimize' %}">
         {% csrf_token %}
         <div id="image-form-div">
             <div id="drop-zone">
@@ -31,18 +32,8 @@
         <input type="number" name="quality" id="quality" min="0" max="100" value="70"><br><br>
 
         <button type="submit">Optimize</button>
-
-        
     </form>
-    {% if file_urls %}
         <h2>Optimized Image</h2>
-        <ul>
-            {% for file_url in file_urls %}
-                <li>
-                    <img src="{{ file_url }}" alt="{{ file_url }}" width="100px"/>
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+        <ul id="optimized-image-ul"></ul>
 </body>
 </html>

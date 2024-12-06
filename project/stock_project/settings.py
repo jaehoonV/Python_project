@@ -127,6 +127,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'stock_chart', 'static'),
     os.path.join(BASE_DIR, 'stock_chart_bokeh', 'static'),
     os.path.join(BASE_DIR, 'Image_Optimization', 'static'),
+    os.path.join(BASE_DIR, 'basic', 'static'),
 ]
 
 # Default primary key field type

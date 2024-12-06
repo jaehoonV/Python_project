@@ -7,6 +7,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('imageOptimization/', views.image_index, name='image_index'), 
+    path('optimize/', views.optimize, name='optimize'), 
 ] 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
