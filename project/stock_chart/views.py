@@ -18,6 +18,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 import os
 from django.conf import settings
+from ta.trend import PSARIndicator
 
 # 티커 목록 가져오기
 def get_ticker_list():
@@ -63,10 +64,14 @@ def get_stock_data(selected_ticker, period_days):
     # 전환선 (9일 기준 고가, 저가의 평균) 계산
     data['ConversionLine'] = (data['High'].rolling(window=9).max() + data['Low'].rolling(window=9).min()) / 2
 
+    # Parabolic SAR 계산
+    psar = PSARIndicator(high=data['High'], low=data['Low'], close=data['Close'])
+    data['PSAR'] = psar.psar()
+
     return data
 
 # 차트 생성 함수
-def plot_stock_chart(selected_ticker, data, period_days, period_months, show_ma5, show_ma20, show_ma60, show_ma120, show_baseline, show_conversionLine, show_bb, show_volume):
+def plot_stock_chart(selected_ticker, data, period_days, period_months, show_ma5, show_ma20, show_ma60, show_ma120, show_baseline, show_conversionLine, show_bb, show_volume, show_psar):
     # 실제로 표시할 기간
     display_data = data.tail(period_days)
 
@@ -85,10 +90,12 @@ def plot_stock_chart(selected_ticker, data, period_days, period_months, show_ma5
     if show_conversionLine: # 전환선
         apds.append(mpf.make_addplot(display_data['ConversionLine'], color='magenta', linestyle='--', label='ConversionLine (9-day Avg)'))
     if show_bb:
-        apds.append(mpf.make_addplot(display_data['BB_upper'], color='purple', label='Bollinger Upper Band'))
-        apds.append(mpf.make_addplot(display_data['BB_lower'], color='purple', label='Bollinger Lower Band'))
+        apds.append(mpf.make_addplot(display_data['BB_upper'], color='yellow', label='Bollinger Upper Band'))
+        apds.append(mpf.make_addplot(display_data['BB_lower'], color='yellow', label='Bollinger Lower Band'))
     if show_volume: # 거래량
         apds.append(mpf.make_addplot(display_data['Volume'], type='bar', color='grey', alpha=0.2, ylabel="Volume"))
+    if show_psar:  # Parabolic SAR
+        apds.append(mpf.make_addplot(display_data['PSAR'], type='scatter', color='purple', marker='o', markersize=5, label='Parabolic SAR'))
 
     # 차트 생성
     fig, axes = mpf.plot(display_data , type='candle', style='charles',
@@ -128,6 +135,7 @@ def generate_chart_image(request):
     show_conversionLine = request.GET.get('show_conversionLine') == 'true'
     show_bb = request.GET.get('show_bb') == 'true'
     show_volume = request.GET.get('show_volume') == 'true'
+    show_psar = request.GET.get('show_psar') == 'true'
 
     data = get_stock_data(selected_ticker, period_days)
 
@@ -135,7 +143,7 @@ def generate_chart_image(request):
         return JsonResponse({'error': f"No data available for ticker {selected_ticker}"}, status=400)
 
     # 차트 데이터 준비
-    data_candles = data[['Open', 'High', 'Low', 'Close', 'Volume', 'MA5', 'MA20', 'MA60', 'MA120', 'Baseline', 'ConversionLine', 'BB_upper', 'BB_lower']]
+    data_candles = data[['Open', 'High', 'Low', 'Close', 'Volume', 'MA5', 'MA20', 'MA60', 'MA120', 'Baseline', 'ConversionLine', 'BB_upper', 'BB_lower', 'PSAR']]
 
     period_months = 24
     # period_days를 월로 변환
@@ -145,7 +153,7 @@ def generate_chart_image(request):
         period_months = 6
 
     # 차트 이미지 생성
-    img_str = plot_stock_chart(selected_ticker, data_candles, period_days, period_months, show_ma5, show_ma20, show_ma60, show_ma120, show_baseline, show_conversionLine, show_bb, show_volume)
+    img_str = plot_stock_chart(selected_ticker, data_candles, period_days, period_months, show_ma5, show_ma20, show_ma60, show_ma120, show_baseline, show_conversionLine, show_bb, show_volume, show_psar)
 
     # Base64 인코딩된 이미지 데이터 반환
     return JsonResponse({'chart_img': img_str})

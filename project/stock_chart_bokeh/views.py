@@ -22,6 +22,7 @@ from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.models import HoverTool, ColumnDataSource, DatetimeTickFormatter, DatetimeTicker, CustomJS
 from bokeh.palettes import Spectral11
+from ta.trend import PSARIndicator
 
 # 티커 목록 가져오기
 def get_ticker_list():
@@ -66,6 +67,10 @@ def get_stock_data(selected_ticker, period_days):
     data['Baseline'] = (data['High'].rolling(window=26).max() + data['Low'].rolling(window=26).min()) / 2
     # 전환선 (9일 기준 고가, 저가의 평균) 계산
     data['ConversionLine'] = (data['High'].rolling(window=9).max() + data['Low'].rolling(window=9).min()) / 2
+
+    # Parabolic SAR 계산
+    psar = PSARIndicator(high=data['High'], low=data['Low'], close=data['Close'])
+    data['PSAR'] = psar.psar()
 
     return data
 
@@ -116,8 +121,10 @@ def create_bokeh_chart(data, options):
     if options['show_conversionLine']: # 전환선
         p.line(source.data['Date'], source.data['ConversionLine'], color="magenta", legend_label="ConversionLine")
     if options['show_bb']:
-        p.line(source.data['Date'], source.data['BB_upper'], color="purple", legend_label="Bollinger Upper Band")
-        p.line(source.data['Date'], source.data['BB_lower'], color="purple", legend_label="Bollinger Lower Band")
+        p.line(source.data['Date'], source.data['BB_upper'], color="yellow", legend_label="Bollinger Upper Band")
+        p.line(source.data['Date'], source.data['BB_lower'], color="yellow", legend_label="Bollinger Lower Band")
+    if options['show_psar']:
+        p.scatter(source.data['Date'], source.data['PSAR'], size=4, color="purple", marker="circle", legend_label="Parabolic SAR")
     
     # HoverTool 추가
     # hover = HoverTool(
@@ -161,7 +168,8 @@ def update_chart(request):
         "show_baseline": request.GET.get('show_baseline') == 'true',
         "show_conversionLine": request.GET.get('show_conversionLine') == 'true',
         "show_bb": request.GET.get('show_bb') == 'true',
-        "show_volume": request.GET.get('show_volume') == 'true'
+        "show_volume": request.GET.get('show_volume') == 'true',
+        "show_psar": request.GET.get('show_psar') == 'true'
     }
 
     data = get_stock_data(ticker, period)

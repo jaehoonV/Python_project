@@ -59,6 +59,9 @@
 
                     <input type="checkbox" name="show_volume" class="show_options" id="show_volume" {% if show_volume|default_if_none:True %}checked{% endif %}>
                     <label for="show_volume">Show Volume</label><br>
+
+                    <input type="checkbox" name="show_psar" class="show_options" id="show_psar" {% if show_psar|default_if_none:True %}checked{% endif %}>
+                    <label for="show_psar">Show Parabolic SAR</label><br>
                 </div>
             </form>
         </div>

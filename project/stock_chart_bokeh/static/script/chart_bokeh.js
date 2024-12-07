@@ -13,7 +13,8 @@ $(document).ready(function () {
             show_baseline: $('#show_baseline').is(':checked'),
             show_conversionLine: $('#show_conversionLine').is(':checked'),
             show_bb: $('#show_bb').is(':checked'),
-            show_volume: $('#show_volume').is(':checked')
+            show_volume: $('#show_volume').is(':checked'),
+            show_psar: $('#show_psar').is(':checked')
         };
         let updateChart_url = $('#chart-image-div').data('url');
 
