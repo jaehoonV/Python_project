@@ -14,69 +14,62 @@
     <link rel="stylesheet" href="{% static 'style/chart.css' %}">
 </head>
 <body>
-    <h1>Stock Price Chart</h1>
+    {% include 'menu.html' %}
+    <div class="main-content">
+        <h1>Stock Price Chart</h1>
     
-    <div style="display: flex;">
-        <div id="form_div">
-            <form action="" method="get">
-                <label for="ticker">Stock Search:</label>
-                <input name="ticker" type="text" data-url="{% url 'autocomplete_tickers' %}" id="ticker-search" placeholder="Search for a stock ticker..." autocomplete="off" value="{{ selected_ticker }}">
-                <input name="ticker-name" type="text" id="ticker-name" value="{{ selected_ticker_name }}" hidden>
-                <div id="autocomplete-results"></div>
+        <div style="display: flex;">
+            <div id="form_div">
+                <form action="" method="get">
+                    <label for="ticker">Stock Search:</label>
+                    <input name="ticker" type="text" data-url="{% url 'autocomplete_tickers' %}" id="ticker-search" placeholder="Search for a stock ticker..." autocomplete="off" value="{{ selected_ticker }}">
+                    <input name="ticker-name" type="text" id="ticker-name" value="{{ selected_ticker_name }}" hidden>
+                    <div id="autocomplete-results"></div>
 
-                <!-- 차트 옵션 -->
-                <h3>Chart Options</h3>
-                <!-- 기간 선택 버튼 -->
-                <label for="period">Period:</label>
-                <select name="period" id="period">
-                    <option value="130" {% if period == 6 %}selected{% endif %} >6 Months</option>
-                    <option value="260" {% if period == 12 %}selected{% endif %} >12 Months</option>
-                    <option value="520" {% if period == 24 %}selected{% endif %} >24 Months</option>
-                </select>
-                <div>
-                    <input type="checkbox" name="show_ma5" class="show_options" id="show_ma5" {% if show_ma5|default_if_none:True %}checked{% endif %}>
-                    <label for="show_ma5">Show MA5</label><br>
+                    <!-- 차트 옵션 -->
+                    <h3>Chart Options</h3>
+                    <!-- 기간 선택 버튼 -->
+                    <label for="period">Period:</label>
+                    <select name="period" id="period">
+                        <option value="130" {% if period == 6 %}selected{% endif %} >6 Months</option>
+                        <option value="260" {% if period == 12 %}selected{% endif %} >12 Months</option>
+                        <option value="520" {% if period == 24 %}selected{% endif %} >24 Months</option>
+                    </select>
+                    <div>
+                        <input type="checkbox" name="show_ma5" class="show_options" id="show_ma5" {% if show_ma5|default_if_none:True %}checked{% endif %}>
+                        <label for="show_ma5">Show MA5</label><br>
+                        
+                        <input type="checkbox" name="show_ma20" class="show_options" id="show_ma20" {% if show_ma20|default_if_none:True %}checked{% endif %}>
+                        <label for="show_ma20">Show MA20</label><br>
                     
-                    <input type="checkbox" name="show_ma20" class="show_options" id="show_ma20" {% if show_ma20|default_if_none:True %}checked{% endif %}>
-                    <label for="show_ma20">Show MA20</label><br>
-                
-                    <input type="checkbox" name="show_ma60" class="show_options" id="show_ma60" {% if show_ma60|default_if_none:True %}checked{% endif %}>
-                    <label for="show_ma60">Show MA60</label><br>
-                
-                    <input type="checkbox" name="show_ma120" class="show_options" id="show_ma120" {% if show_ma120|default_if_none:True %}checked{% endif %}>
-                    <label for="show_ma120">Show MA120</label><br>
+                        <input type="checkbox" name="show_ma60" class="show_options" id="show_ma60" {% if show_ma60|default_if_none:True %}checked{% endif %}>
+                        <label for="show_ma60">Show MA60</label><br>
+                    
+                        <input type="checkbox" name="show_ma120" class="show_options" id="show_ma120" {% if show_ma120|default_if_none:True %}checked{% endif %}>
+                        <label for="show_ma120">Show MA120</label><br>
 
-                    <input type="checkbox" name="show_baseline" class="show_options" id="show_baseline" {% if show_baseline|default_if_none:True %}checked{% endif %}>
-                    <label for="show_baseline">Show Baseline</label><br>
+                        <input type="checkbox" name="show_baseline" class="show_options" id="show_baseline" {% if show_baseline|default_if_none:True %}checked{% endif %}>
+                        <label for="show_baseline">Show Baseline</label><br>
 
-                    <input type="checkbox" name="show_conversionLine" class="show_options" id="show_conversionLine" {% if show_conversionLine|default_if_none:True %}checked{% endif %}>
-                    <label for="show_conversionLine">Show ConversionLine</label><br>
-                
-                    <input type="checkbox" name="show_bb" class="show_options" id="show_bb" {% if show_bb|default_if_none:True %}checked{% endif %}>
-                    <label for="show_bb">Show Bollinger Bands</label><br>
+                        <input type="checkbox" name="show_conversionLine" class="show_options" id="show_conversionLine" {% if show_conversionLine|default_if_none:True %}checked{% endif %}>
+                        <label for="show_conversionLine">Show ConversionLine</label><br>
+                    
+                        <input type="checkbox" name="show_bb" class="show_options" id="show_bb" {% if show_bb|default_if_none:True %}checked{% endif %}>
+                        <label for="show_bb">Show Bollinger Bands</label><br>
 
-                    <input type="checkbox" name="show_volume" class="show_options" id="show_volume" {% if show_volume|default_if_none:True %}checked{% endif %}>
-                    <label for="show_volume">Show Volume</label><br>
+                        <input type="checkbox" name="show_volume" class="show_options" id="show_volume" {% if show_volume|default_if_none:True %}checked{% endif %}>
+                        <label for="show_volume">Show Volume</label><br>
 
-                    <input type="checkbox" name="show_psar" class="show_options" id="show_psar" {% if show_psar|default_if_none:True %}checked{% endif %}>
-                    <label for="show_psar">Show Parabolic SAR</label><br>
+                        <input type="checkbox" name="show_psar" class="show_options" id="show_psar" {% if show_psar|default_if_none:True %}checked{% endif %}>
+                        <label for="show_psar">Show Parabolic SAR</label><br>
+                    </div>
+                </form>
+            </div>
+            <div style="width: 100%; padding: 20px;">
+                <div style="width: 1700px; margin: 0 auto;">
+                    <h2>Chart for <span id="selected-ticker-name"></span></h2>
+                    <div id="chart-image-div" data-url="{% url 'generate_chart_image' %}"></div>
                 </div>
-            </form>
-            <div>
-                <a href="{% url 'bokeh_index' %}">
-                    <button>Go to Bokeh Chart</button>
-                </a>
-            </div>
-            <div>
-                <a href="{% url 'image_index' %}">
-                    <button>Go to Image Optimization</button>
-                </a>
-            </div>
-        </div>
-        <div style="width: 100%; padding: 20px;">
-            <div style="width: 1700px; margin: 0 auto;">
-                <h2>Chart for <span id="selected-ticker-name"></span></h2>
-                <div id="chart-image-div" data-url="{% url 'generate_chart_image' %}"></div>
             </div>
         </div>
     </div>

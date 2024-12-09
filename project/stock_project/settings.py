@@ -59,6 +59,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'stock_chart', 'templates'),
             os.path.join(BASE_DIR, 'stock_chart_bokeh', 'templates'),
             os.path.join(BASE_DIR, 'Image_Optimization', 'templates'),
+            os.path.join(BASE_DIR, 'basic', 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {

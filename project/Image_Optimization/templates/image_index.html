@@ -13,27 +13,30 @@
     <link rel="stylesheet" href="{% static 'style/image_index.css' %}">
 </head>
 <body>
-    <h1>Image Optimization</h1>
-    
-    <form method="post" enctype="multipart/form-data" id="image-form" data-url="{% url 'optimize' %}">
-        {% csrf_token %}
-        <div id="image-form-div">
-            <div id="drop-zone">
-                Drag & Drop your files here or <span style="color: blue; text-decoration: underline;">click to select</span>.
+    {% include 'menu.html' %}
+    <div class="main-content">
+        <h1>Image Optimization</h1>
+        
+        <form method="post" enctype="multipart/form-data" id="image-form" data-url="{% url 'optimize' %}">
+            {% csrf_token %}
+            <div id="image-form-div">
+                <div id="drop-zone">
+                    Drag & Drop your files here or <span style="color: blue; text-decoration: underline;">click to select</span>.
+                </div>
+                <div id="file-list-div">
+                    <ul id="file-list"></ul>
+                </div>
             </div>
-            <div id="file-list-div">
-                <ul id="file-list"></ul>
-            </div>
-        </div>
-        <input type="file" id="file-input" name="files" multiple hidden>
-        <br><br>
+            <input type="file" id="file-input" name="files" multiple hidden>
+            <br><br>
 
-        <label for="quality">Optimization Quality (0-100):</label>
-        <input type="number" name="quality" id="quality" min="0" max="100" value="70"><br><br>
+            <label for="quality">Optimization Quality (0-100):</label>
+            <input type="number" name="quality" id="quality" min="0" max="100" value="70"><br><br>
 
-        <button type="submit">Optimize</button>
-    </form>
+            <button type="submit">Optimize</button>
+        </form>
         <h2>Optimized Image</h2>
         <ul id="optimized-image-ul"></ul>
+    </div>
 </body>
 </html>
