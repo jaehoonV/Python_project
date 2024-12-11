@@ -68,12 +68,16 @@ def get_stock_data(selected_ticker, period_days):
     psar = PSARIndicator(high=data['High'], low=data['Low'], close=data['Close'])
     data['PSAR'] = psar.psar()
 
+    # RSI 계산
+    data['RSI'] = calculate_rsi(data)
+
     return data
 
 # 차트 생성 함수
 def plot_stock_chart(selected_ticker, data, period_days, period_months, show_ma5, show_ma20, show_ma60, show_ma120, show_baseline, show_conversionLine, show_bb, show_volume, show_psar):
     # 실제로 표시할 기간
     display_data = data.tail(period_days)
+    print(display_data)
 
     # 5, 20, 60, 120 이동평균선, 기준선, 전환선, 볼린저 밴드 추가
     apds = []
@@ -97,12 +101,18 @@ def plot_stock_chart(selected_ticker, data, period_days, period_months, show_ma5
     if show_psar:  # Parabolic SAR
         apds.append(mpf.make_addplot(display_data['PSAR'], type='scatter', color='purple', marker='o', markersize=5, label='Parabolic SAR'))
 
+    
+    apds.append(mpf.make_addplot(display_data['RSI'], panel=1, color='lime', label='RSI'))
+    apds.append(mpf.make_addplot([70] * len(display_data), panel=1, color='red', linestyle='--'))  # 과매수 기준선
+    apds.append(mpf.make_addplot([30] * len(display_data), panel=1, color='blue', linestyle='--'))  # 과매도 기준선
+
     # 차트 생성
     fig, axes = mpf.plot(display_data , type='candle', style='charles',
-                         title=f"{selected_ticker} Stock Prices ({period_months} Months)", ylabel="Price (USD)", addplot=apds, returnfig=True, figsize=(16, 8))
+                         title=f"{selected_ticker} Stock Prices ({period_months} Months)", ylabel="Price (USD)", addplot=apds, returnfig=True, figsize=(16, 7))
 
     # 범례 추가
-    axes[0].legend(loc='upper left', bbox_to_anchor=(-0.25, 1), fontsize=9)
+    axes[0].legend(loc='upper left', bbox_to_anchor=(-0.255, 1), fontsize=9)
+    axes[1].legend(loc='upper left', fontsize=9)
 
     plt.xticks(rotation=65)  # 날짜가 겹치지 않도록 회전시킬 수 있습니다.
 
@@ -112,6 +122,21 @@ def plot_stock_chart(selected_ticker, data, period_days, period_months, show_ma5
     img_buf.seek(0)
     img_str = base64.b64encode(img_buf.read()).decode('utf-8')
     return img_str
+
+# RSI 계산 함수
+def calculate_rsi(data, window=14):
+    delta = data['Close'].diff()  # 종가의 차이 계산
+    gain = delta.where(delta > 0, 0)  # 상승폭
+    loss = -delta.where(delta < 0, 0)  # 하락폭
+
+    # 평균 상승/하락폭 계산 (Wilder’s Smoothing)
+    avg_gain = gain.rolling(window=window, min_periods=1).mean()
+    avg_loss = loss.rolling(window=window, min_periods=1).mean()
+
+    # RS 및 RSI 계산
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
 
 # 기본 페이지
 def index(request):
@@ -143,7 +168,7 @@ def generate_chart_image(request):
         return JsonResponse({'error': f"No data available for ticker {selected_ticker}"}, status=400)
 
     # 차트 데이터 준비
-    data_candles = data[['Open', 'High', 'Low', 'Close', 'Volume', 'MA5', 'MA20', 'MA60', 'MA120', 'Baseline', 'ConversionLine', 'BB_upper', 'BB_lower', 'PSAR']]
+    data_candles = data[['Open', 'High', 'Low', 'Close', 'Volume', 'MA5', 'MA20', 'MA60', 'MA120', 'Baseline', 'ConversionLine', 'BB_upper', 'BB_lower', 'PSAR', 'RSI']]
 
     period_months = 24
     # period_days를 월로 변환

@@ -22,6 +22,7 @@ from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.models import HoverTool, ColumnDataSource, DatetimeTickFormatter, DatetimeTicker, CustomJS
 from bokeh.palettes import Spectral11
+from bokeh.layouts import gridplot
 from ta.trend import PSARIndicator
 
 # 티커 목록 가져오기
@@ -72,6 +73,9 @@ def get_stock_data(selected_ticker, period_days):
     psar = PSARIndicator(high=data['High'], low=data['Low'], close=data['Close'])
     data['PSAR'] = psar.psar()
 
+    # RSI 계산
+    data['RSI'] = calculate_rsi(data)
+
     return data
 
 # 기본 페이지
@@ -96,8 +100,8 @@ def create_bokeh_chart(data, options):
     
     p = figure(
         x_axis_type="datetime",
-        width=1400,
-        height=600,
+        width=1500,
+        height=400,
         tools="pan,box_zoom,reset,save"
     )
     
@@ -125,20 +129,6 @@ def create_bokeh_chart(data, options):
         p.line(source.data['Date'], source.data['BB_lower'], color="yellow", legend_label="Bollinger Lower Band")
     if options['show_psar']:
         p.scatter(source.data['Date'], source.data['PSAR'], size=4, color="purple", marker="circle", legend_label="Parabolic SAR")
-    
-    # HoverTool 추가
-    # hover = HoverTool(
-    #     tooltips=[
-    #         ("Date", "@Date{%Y}"),
-    #         ("Open", "@Open{0.2f}"),
-    #         ("High", "@High{0.2f}"),
-    #         ("Low", "@Low{0.2f}"),
-    #         ("Close", "@Close{0.2f}"),
-    #     ],
-    #     formatters={"@Date": "datetime"},
-    # )
-
-    # p.add_tools(hover)
 
     # x축 날짜 형식 설정
     p.xaxis.formatter = DatetimeTickFormatter(
@@ -152,10 +142,50 @@ def create_bokeh_chart(data, options):
     p.xaxis.major_label_orientation = 0.75  # 레이블 기울기
 
     p.legend.location = "top_left"
+    p.legend.label_text_font_size = "7pt"
+    p.legend.padding = 2
     p.xaxis.axis_label = "Date"
     p.yaxis.axis_label = "Price (USD)"
 
-    return components(p)
+    # RSI 보조 지표 추가
+    p_rsi = figure(
+        x_axis_type="datetime",
+        width=1500,
+        height=200,
+        tools="pan,box_zoom,reset,save",
+        title="RSI"
+    )
+    p_rsi.line(source.data['Date'], source.data['RSI'], color="lime", legend_label="RSI")
+    p_rsi.line(source.data['Date'], [70] * len(source.data['Date']), color="red", legend_label="Overbought (70)", line_dash="dashed")
+    p_rsi.line(source.data['Date'], [30] * len(source.data['Date']), color="blue", legend_label="Oversold (30)", line_dash="dashed")
+    p_rsi.legend.location = "top_left"
+    p_rsi.legend.label_text_font_size = "7pt"
+    p_rsi.legend.padding = 2 
+    p_rsi.xaxis.formatter = DatetimeTickFormatter(days="%Y-%m-%d", months="%Y-%m", years="%Y")
+    p_rsi.xaxis.ticker = DatetimeTicker(desired_num_ticks=30)
+    p_rsi.xaxis.major_label_orientation = 0.75
+    p_rsi.xaxis.axis_label = "Date"
+    p_rsi.yaxis.axis_label = "RSI"
+
+    # Gridplot으로 메인 차트와 RSI를 결합
+    layout = gridplot([[p], [p_rsi]])
+
+    return components(layout)
+
+# RSI 계산 함수
+def calculate_rsi(data, window=14):
+    delta = data['Close'].diff()  # 종가의 차이 계산
+    gain = delta.where(delta > 0, 0)  # 상승폭
+    loss = -delta.where(delta < 0, 0)  # 하락폭
+
+    # 평균 상승/하락폭 계산 (Wilder’s Smoothing)
+    avg_gain = gain.rolling(window=window, min_periods=1).mean()
+    avg_loss = loss.rolling(window=window, min_periods=1).mean()
+
+    # RS 및 RSI 계산
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
 
 def update_chart(request):
     ticker = request.GET.get("ticker", "AAPL")
