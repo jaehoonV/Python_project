@@ -60,6 +60,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'stock_chart_bokeh', 'templates'),
             os.path.join(BASE_DIR, 'Image_Optimization', 'templates'),
             os.path.join(BASE_DIR, 'basic', 'templates'),
+            os.path.join(BASE_DIR, 'kr_stock', 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -129,6 +130,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'stock_chart_bokeh', 'static'),
     os.path.join(BASE_DIR, 'Image_Optimization', 'static'),
     os.path.join(BASE_DIR, 'basic', 'static'),
+    os.path.join(BASE_DIR, 'kr_stock', 'static'),
 ]
 
 # Default primary key field type
