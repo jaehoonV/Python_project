@@ -1,0 +1,37 @@
+<!-- image_index.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Chart</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  <!-- jQuery -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.13.7/sorting/formatted-numbers.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <!-- highcharts cdn -->
+    <!-- <script src="https://code.highcharts.com/highcharts.js"></script> -->
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/drag-panes.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/accessibility.js"></script>
+    <!-- highcharts cdn -->
+    <script src="{% static 'script/common.js' %}"></script>
+    <script src="{% static 'script/kr_stock_pop.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'style/basic.css' %}">
+</head>
+<body>
+    <input type="text" id="itemNm" style="display: none;">
+    <input type="text" id="beginBasDt" style="display: none;">
+    <input type="text" id="endBasDt" style="display: none;">
+    
+    <div id="data_screen">
+        <div id="chart_div1">
+            <div id="chart-candlestick"></div>
+        </div>
+    </div>
+    <div id="check_data"></div>
+</body>
+</html>

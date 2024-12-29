@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    let popupWindow, endDt;
     stockSearch();
 
     $(document).on("click",".view_chart",function(){
@@ -31,15 +32,26 @@ $(document).ready(function () {
         const day = today.getDate();      // 일
 
         let cal_month = new Date(year, month - months, day);
+        let cal_month_6 = new Date(cal_month.getFullYear(), cal_month.getMonth() - 6, cal_month.getDate());
         let beginBasDt = "".concat(cal_month.getFullYear(), lpad(cal_month.getMonth() + 1, 2), lpad(cal_month.getDate(), 2));
-        let endBasDt = "".concat(today.getFullYear(), lpad(today.getMonth() + 1, 2), lpad(today.getDate(), 2));
+        let beginBasDt_6 = "".concat(cal_month_6.getFullYear(), lpad(cal_month_6.getMonth() + 1, 2), lpad(cal_month_6.getDate(), 2));
+        let endBasDt = endDt;
         
         let formData = {
             "type": "M",
             "beginBasDt": beginBasDt,
+            "beginBasDt_6": beginBasDt_6,
             "endBasDt": endBasDt,
             "itemNm": itemNm
         }
+        
+        // open popup chart
+        const popupUrl = `/popup_chart/`;
+        const popupOptions = "width = 1800, height = 900, top = 30, left = 10, location = no";
+        popupWindow = window.open(popupUrl, "PopupChart", popupOptions);
+        popupWindow.onload = function () {
+            popupWindow.postMessage(formData, window.location.origin);
+        };
 
         $.ajax({
             url: '/krStockSearch',
@@ -52,11 +64,13 @@ $(document).ready(function () {
                 alert("Error generating chart: " + (xhr.responseJSON?.error || "Unknown error"));
             }
         });
+
     }
 
     function makeDataTable(data) {
         let items = data.data.response.body.items.item;
         let date = data.date;
+        endDt = date;
         let output = "";
 
         if(items.length == 0){

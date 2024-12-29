@@ -8,5 +8,7 @@ from django.conf import settings
 urlpatterns = [
     path('kr_stock/', views.kr_stock, name='kr_stock'), 
     path('krStockSearch/', views.krStockSearch, name='krStockSearch'), 
+    path('popup_chart/', views.popup_chart, name='popup_chart'), 
+    path('krStockSearchPop/', views.krStockSearchPop, name='krStockSearchPop'), 
 ] 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
