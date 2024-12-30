@@ -76,7 +76,8 @@ def krStockSearch(request):
     elif type == "M":
         #monthChartSearch
         beginBasDt = request.GET.get("beginBasDt")
-        endBasDt = request.GET.get("endBasDt")
+        current_date = datetime.today()
+        endBasDt = current_date.strftime('%Y%m%d')
         itemNm = request.GET.get("itemNm")
 
         # URL 생성
@@ -110,7 +111,8 @@ def krStockSearchPop(request):
         return JsonResponse({"error": str(e)}, status=500)
     
     beginBasDt = request.GET.get("beginBasDt")
-    endBasDt = request.GET.get("endBasDt")
+    current_date = datetime.today()
+    endBasDt = current_date.strftime('%Y%m%d')
     itemNm = request.GET.get("itemNm")
 
     # URL 생성
@@ -196,6 +198,19 @@ def krStockSearchPop(request):
         if disparity < 102 and pre_disparity >= 102:
             disparityDeadCross.append([basDt[i], int(MA5[i])])
 
+    # RSI 계산
+    delta = clpr_series.diff()
+    gain = delta.where(delta > 0, 0)  # 상승폭
+    loss = -delta.where(delta < 0, 0)  # 하락폭
+
+    # 평균 상승/하락폭 계산 (Wilder’s Smoothing)
+    avg_gain = gain.rolling(window=14, min_periods=1).mean()
+    avg_loss = loss.rolling(window=14, min_periods=1).mean()
+
+    # RS 및 RSI 계산
+    rs = avg_gain / avg_loss
+    RSI = round(100 - (100 / (1 + rs)), 2)
+
     result = {
         "basDt": basDt[120:],
         "clpr": [int(float(v)) for v in clpr[120:]],
@@ -219,6 +234,7 @@ def krStockSearchPop(request):
         "BCDeadCross": BCDeadCross,
         "disparityGoldenCross": disparityGoldenCross,
         "disparityDeadCross": disparityDeadCross,
+        "RSI": RSI[120:].tolist(),
     }
 
     return JsonResponse(result)

@@ -70,3 +70,19 @@ table.dataTable tbody th, table.dataTable tbody td {
     padding: 1px;
     font-size: 11px;
 }
+
+#data_screen{
+    display: flex;
+    gap: 3px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#chart_div1 {
+    width: 1650px;
+    height: 870px;
+    margin: 10px auto;
+    border: 1px solid #ddd;
+    padding: 0 10px;
+}

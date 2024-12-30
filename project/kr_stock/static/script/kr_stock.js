@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    let popupWindow, endDt;
+    let popupWindow;
     stockSearch();
 
     $(document).on("click",".view_chart",function(){
@@ -46,6 +46,9 @@ $(document).ready(function () {
         }
         
         // open popup chart
+        if (popupWindow && !popupWindow.closed) {
+            popupWindow.close(); // 기존 팝업 닫기
+        }
         const popupUrl = `/popup_chart/`;
         const popupOptions = "width = 1800, height = 900, top = 30, left = 10, location = no";
         popupWindow = window.open(popupUrl, "PopupChart", popupOptions);
@@ -70,7 +73,6 @@ $(document).ready(function () {
     function makeDataTable(data) {
         let items = data.data.response.body.items.item;
         let date = data.date;
-        endDt = date;
         let output = "";
 
         if(items.length == 0){
