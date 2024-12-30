@@ -35,13 +35,11 @@ $(document).ready(function () {
         let cal_month_6 = new Date(cal_month.getFullYear(), cal_month.getMonth() - 6, cal_month.getDate());
         let beginBasDt = "".concat(cal_month.getFullYear(), lpad(cal_month.getMonth() + 1, 2), lpad(cal_month.getDate(), 2));
         let beginBasDt_6 = "".concat(cal_month_6.getFullYear(), lpad(cal_month_6.getMonth() + 1, 2), lpad(cal_month_6.getDate(), 2));
-        let endBasDt = endDt;
         
         let formData = {
             "type": "M",
             "beginBasDt": beginBasDt,
             "beginBasDt_6": beginBasDt_6,
-            "endBasDt": endBasDt,
             "itemNm": itemNm
         }
         

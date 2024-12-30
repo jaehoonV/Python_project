@@ -16,6 +16,7 @@ $(function () {
     });
 
     function searchStockPop(){
+        body_loading(true);
         let formData = {
             "beginBasDt": $('#beginBasDt').val(),
             "endBasDt": $('#endBasDt').val(),
@@ -699,6 +700,8 @@ $(function () {
                 enabled: false
             },
         });
+
+        body_loading(false);
     }
     /* createChart */
 
