@@ -6,6 +6,10 @@ from io import StringIO
 import csv
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import xml.etree.ElementTree as ET
 
 headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36'}
 url = 'https://finance.naver.com/item/sise_day.nhn?'
@@ -113,12 +117,50 @@ def fetch_and_process_data(ticker_list):
     
     return all_output
 
+def load_config(file_path):
+    tree = ET.parse(file_path)  # XML 파일 파싱
+    root = tree.getroot()
+
+    # 필요한 데이터 추출
+    email = root.find("./api/email").text
+    pw = root.find("./api/pw").text
+
+    return email, pw
+
+# 메일 전송 함수
+def send_email(subject, body, recipient_email):
+
+    email, pw = load_config("./API_Key/mail_key.xml")
+    sender_email = email  # 발신자 이메일
+    sender_password = pw  # 발신자 이메일 비밀번호 또는 앱 비밀번호 (Gmail 2단계 인증 시 앱 비밀번호 사용)
+
+    try:
+        # SMTP 서버 설정
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()  # TLS 보안 활성화
+            server.login(sender_email, sender_password)  # 로그인
+
+            # 이메일 구성
+            msg = MIMEMultipart()
+            msg["From"] = sender_email
+            msg["To"] = recipient_email
+            msg["Subject"] = subject
+
+            # 본문 추가
+            msg.attach(MIMEText(body, "html"))
+
+            # 이메일 전송
+            server.send_message(msg)
+            print("메일이 성공적으로 전송되었습니다.")
+    except Exception as e:
+        print(f"메일 전송 중 오류 발생: {e}")
+
 # 실행
 if __name__ == '__main__':
     start_time = time.time()  # 실행 시작 시간 기록
 
     formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
-    print(f"실행시각 : {formatted_time} / 분석중...")
+    print(f"실행 시간 : {formatted_time} / 분석중...")
 
     output = fetch_and_process_data(ticker_list)
 
@@ -126,37 +168,56 @@ if __name__ == '__main__':
     category_count = defaultdict(lambda: {'상승': 0, '하락': 0})
 
     # 날짜별 및 종목별 상승, 하락 횟수 계산
-    date_count = defaultdict(lambda: {'상승': 0, '하락': 0, '종목': defaultdict(lambda: {'상승': 0, '하락': 0})})
+    date_count = defaultdict(lambda: {'상승': 0, '하락': 0, '종목': defaultdict(lambda: {'상승': 0, '하락': 0, 'ticker': None})})
 
     for record in output:
         date = record["날짜"]
         stock = record["종목명"]
+        ticker = record["종목코드"]
         for key in ['초단기예측', '단기예측', '전환예측']:
             if record[key] == '상승':
                 category_count[key]['상승'] += 1
                 date_count[date]['상승'] += 1
                 date_count[date]['종목'][stock]['상승'] += 1
+                date_count[date]['종목'][stock]['ticker'] = ticker
             elif record[key] == '하락':
                 category_count[key]['하락'] += 1
                 date_count[date]['하락'] += 1
                 date_count[date]['종목'][stock]['하락'] += 1
+                date_count[date]['종목'][stock]['ticker'] = ticker
 
     # 결과 출력
     end_time = time.time()  # 실행 끝 시간 기록
     execution_time = end_time - start_time  # 실행 시간 계산
 
+    output_text = f"<html><body><div>분석 시간 : {formatted_time} (Execution time: {execution_time:.2f} seconds)</div>"
     print(f"\nExecution time: {execution_time:.2f} seconds")  # 실행 시간 출력
-    print("Output:")
-    print(output)
     print("예측별 상승, 하락 횟수:")
     for category, counts in category_count.items():
         print(f"{category}: 상승: {counts['상승']}, 하락: {counts['하락']}")
 
-    print("\n날짜 및 종목별 상승, 하락 횟수:")
+    output_text += "<br><div>최근 3일 기준 종목별 상승, 하락 신호</div><br>"
+    output_text += "<div style='display: flex; gap: 10px;'>"
+    print("\n최근 3일 기준 종목별 상승, 하락 신호")
     for date in sorted(date_count.keys(), reverse=True): # 날짜를 내림차순으로 정렬
         counts = date_count[date]
-        print(f"날짜: {date} - 상승: {counts['상승']}, 하락: {counts['하락']}")
+        formatted_date = date.strftime("%Y-%m-%d")  
+        print(f"날짜: {formatted_date} - 상승: {counts['상승']}, 하락: {counts['하락']}")
+        output_text += "<div style='border: 1px solid #ddd; border-radius: 5px; padding: 5px; font-size: 14px;'>"
+        output_text += f"<div style='text-align: center;'>날짜: {formatted_date} - 상승: {counts['상승']}, 하락: {counts['하락']}</div><ul style='padding: 20px; list-style: none;'>"
         for stock, stock_counts in counts['종목'].items():
             print(f" - 종목: {stock} - 상승: {stock_counts['상승']}, 하락: {stock_counts['하락']}")
+            # 네이버 금융 링크 생성
+            ticker = stock_counts['ticker']
+            stock_link = f"https://finance.naver.com/item/main.nhn?code={ticker}"
+            # HTML 링크 추가
+            stock_with_link = f'<a href="{stock_link}" target="_blank">{stock}</a>'
+            output_text += f"<li>{stock_with_link} - 상승: {stock_counts['상승']}, 하락: {stock_counts['하락']}</li>"
         print("\n")
-    
+        output_text += "</ul></div>"
+    output_text +="</div></body></html>"
+
+    # 메일 전송
+    recipient_email = "ljh1032112@gmail.com"  # 수신자 이메일
+    subject = f"주식 분석 결과 - {formatted_time}"
+    send_email(subject, output_text, recipient_email)
