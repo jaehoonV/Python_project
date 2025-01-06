@@ -205,7 +205,11 @@ if __name__ == '__main__':
         print(f"날짜: {formatted_date} - 상승: {counts['상승']}, 하락: {counts['하락']}")
         output_text += "<div style='border: 1px solid #ddd; border-radius: 5px; padding: 5px; font-size: 14px;'>"
         output_text += f"<div style='text-align: center;'>날짜: {formatted_date} - 상승: {counts['상승']}, 하락: {counts['하락']}</div><ul style='padding: 20px; list-style: none;'>"
-        for stock, stock_counts in counts['종목'].items():
+        
+        # 종목 데이터를 상승 횟수를 기준으로 내림차순 정렬
+        sorted_stocks = sorted(counts['종목'].items(), key=lambda x: x[1]['상승'], reverse=True)
+
+        for stock, stock_counts in sorted_stocks:
             print(f" - 종목: {stock} - 상승: {stock_counts['상승']}, 하락: {stock_counts['하락']}")
             # 네이버 금융 링크 생성
             ticker = stock_counts['ticker']
