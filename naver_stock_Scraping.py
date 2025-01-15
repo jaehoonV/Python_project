@@ -62,10 +62,14 @@ def process_stock_data(ticker_info):
     # 전환선 (9일 기준 고가, 저가의 평균) 계산
     df["ConversionLine"] = ((df["고가"].rolling(window=9).max() + df["저가"].rolling(window=9).min()) / 2).fillna(0).round().astype(int)
 
+    # 이격도 계산 및 예측
+    df["Disparity"] = (df["MA5"] / df["MA20"]) * 100
+
     # 예측값 설정
     df["초단기예측"] = None  # 초기값 설정
     df["단기예측"] = None  # 초기값 설정
     df["전환예측"] = None  # 초기값 설정
+    df["이격도예측"] = None  # 초기값 설정
 
     # 상승/하락 예측 조건 설정 (위의 예측 조건들 포함)
 
@@ -81,16 +85,23 @@ def process_stock_data(ticker_info):
     condition3_down = (df["Baseline"] > df["ConversionLine"]) & (df["Baseline"].shift(1) <= df["ConversionLine"].shift(1)) & (df["Baseline"].shift(2) <= df["ConversionLine"].shift(2))
     condition3_up = (df["Baseline"] < df["ConversionLine"]) & (df["Baseline"].shift(1) >= df["ConversionLine"].shift(1)) & (df["Baseline"].shift(2) >= df["ConversionLine"].shift(2))
 
+    # 이격도 예측값 설정
+    disparity_up = (df["Disparity"] > 98) & (df["Disparity"].shift(1) <= 98)
+    disparity_down = (df["Disparity"] < 102) & (df["Disparity"].shift(1) >= 102)
+
     df.loc[condition_down, "초단기예측"] = "하락"
     df.loc[condition_up, "초단기예측"] = "상승"
     df.loc[condition2_down, "단기예측"] = "하락"
     df.loc[condition2_up, "단기예측"] = "상승"
     df.loc[condition3_down, "전환예측"] = "하락"
     df.loc[condition3_up, "전환예측"] = "상승"
+    df.loc[disparity_up, "이격도예측"] = "상승"
+    df.loc[disparity_down, "이격도예측"] = "하락"
 
-    # 마지막 3개의 행에서 '초단기예측', '단기예측', '전환예측'이 None이 아닌 경우 필터링
+    # 마지막 3개의 행에서 예측 데이터 필터링
     filtered_df = df.tail(3)
-    filtered_df = filtered_df.dropna(subset=["초단기예측", "단기예측", "전환예측"], how="all")
+    filtered_df = filtered_df.dropna(subset=["초단기예측", "단기예측", "전환예측", "이격도예측"], how="all")
+
     output = []
     if not filtered_df.empty:
         for index, row in filtered_df.iterrows():
@@ -100,7 +111,8 @@ def process_stock_data(ticker_info):
                 "종목코드": ticker,
                 "초단기예측": row["초단기예측"],
                 "단기예측": row["단기예측"],
-                "전환예측": row["전환예측"]
+                "전환예측": row["전환예측"],
+                "이격도예측": row["이격도예측"]
             })
     
     return output
@@ -164,7 +176,7 @@ if __name__ == '__main__':
 
     output = fetch_and_process_data(ticker_list)
 
-    # 초단기예측, 단기예측, 전환예측별 상승/하락 횟수 계산
+    # 예측별 상승/하락 횟수 계산
     category_count = defaultdict(lambda: {'상승': 0, '하락': 0})
 
     # 날짜별 및 종목별 상승, 하락 횟수 계산
@@ -174,7 +186,7 @@ if __name__ == '__main__':
         date = record["날짜"]
         stock = record["종목명"]
         ticker = record["종목코드"]
-        for key in ['초단기예측', '단기예측', '전환예측']:
+        for key in ['초단기예측', '단기예측', '전환예측', '이격도예측']:
             if record[key] == '상승':
                 category_count[key]['상승'] += 1
                 date_count[date]['상승'] += 1
