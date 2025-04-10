@@ -61,7 +61,39 @@ def get_us_economic_indicators():
     except Exception as e:
         print("경제 지표 스크래핑 오류:", e)
 
+def get_fear_and_greed_index():
+    url = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept": "application/json",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://edition.cnn.com/",
+        "Origin": "https://edition.cnn.com",
+        "Connection": "keep-alive"
+    }
+
+    try:
+        res = requests.get(url, headers=headers)
+        data = res.json()
+        # 점수
+        score = round(float(data['fear_and_greed']['score']), 1)
+        if score < 25:
+            status = "Extreme Fear"
+        elif score < 45:
+            status = "Fear"
+        elif score < 55:
+            status = "Neutral"
+        elif score < 75:
+            status = "Greed"
+        else:
+            status = "Extreme Greed"
+
+        print(f"\n🧠 CNN 공포와 탐욕 지수 (Fear & Greed Index): {score}점 ({status})")
+
+    except Exception as e:
+        print("공포와 탐욕 지수 스크래핑 오류:", e)
 
 if __name__ == "__main__":
     print(f"📅 데이터 기준일: {datetime.now().strftime('%Y-%m-%d')}")
     get_us_economic_indicators()
+    get_fear_and_greed_index()
